@@ -1,0 +1,19 @@
+# Arquivos de configuração e senhas
+.env
+.env.*
+!.env.example
+
+# Arquivos temporários
+*.log
+*.tmp
+
+# Configurações do editor
+.vscode/
+
+# Sistema operacional
+Thumbs.db
+.DS_Store
+
+# Dependências
+vendor/
+__pycache__/

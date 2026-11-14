@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Produtos - LojaFacil</title>
+</head>
+<body>
+    
+    <h1>LojaFacil</h1>
+
+    <h2>Produtos cadastrados</h2>
+
+    <!-- Campo de pesquisa -->
+     <label for="pesquisa">Pesquisar produto:</label>
+     <input type="text" id="pesquisa" name="pesquisa" 
+     placeholder="Digite o nome do protudo">
+
+     <button type="button" onclick="pesquisarProduto()">Pesquisar</button>
+
+     <br><br>
+
+     <!--Botão para cadastrar poduto -->
+
+     <a href="cadastro_produto.html"><button type="button">Cadastrar produto</button></a>
+
+     <br><br>
+
+     <!--Tabela de produtos -->
+
+     <table border="1">
+
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nome</th>
+                <th>Marca</th>
+                <th>Unidade</th>
+                <th>Quantidade</th>
+                <th>Preço</th>
+                <th>Status</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody id="listaProdutos">
+        </tbody>
+     </table>
+     <!--Formulário para editar produto -->
+
+        <h2>Editar produto</h2>
+
+        <form id="formEditarProduto">
+
+            <input type="hidden" id="editar_id" name="id">
+
+            <label>Nome:</label>
+            <input type="text" id="editar_nome" name="nome" required>
+            <br><br>
+
+            <label>Descrição:</label>
+            <input type="text" id="editar_descricao" name="descricao">
+            <br><br>
+
+            <label>Marca:</label>
+            <input type="text" id="editar_marca" name="marca">
+            <br><br>
+
+            <label>Unidade:</label>
+            <input type="text" id="editar_unidade" name="unidade" required]>
+            <br><br>
+
+            <label>Quantidade:</label>
+            <input type="number" id="editar_quantidade" name="quantidade" step="0.001" min="0" required>
+            <br><br>
+
+            <label>Preço:</label>
+            <input type="number" id="editar_preco_venda" name="preco_venda" step="0.01" min="0.01" required>
+            <br><br>
+
+            <label>Imagem URL:</label>
+            <input type="text" id="editar_imagem-url" name="imagem_url">
+            <br><br>
+
+            <button type="submit">Salvar alterações</button>
+        </form>
+<script>
+
+    // 1. Função para carregar os produtos
+    function carregarProdutos()
+    {
+        fetch('../backend/produtos/listar.php')
+            .then(resposta => resposta.json())
+            .then(dados =>{
+                // 2.Localizar o corpo da tabela
+                const lista = document.getElementById('listaProdutos');
+
+                // 3. Limpar a tabela
+                lista.innerHTML = '';
+
+                // 4. Percorrer os produtos recebidos
+                dados.produtos.forEach(produto =>{
+
+                    // 5. Criar uma linha para cada produto
+                     const linha = document.createElement('tr');
+
+                    linha.innerHTML = `
+                        <td>${produto.id}</td>
+                        <td>${produto.nome}</td>
+                        <td>${produto.marca ?? '-'}</td>
+                        <td>${produto.unidade}</td>
+                        <td>${produto.quantidade}</td>
+                        <td>R$ ${produto.preco_venda}</td>
+                        <td>${produto.ativo == 1 ? 'Ativo' : 'Inativo'}</td>
+                        <td>
+                        <button type="button" onclick="editarProduto(${produto.id})">
+                        Editar
+                        </button>
+
+                        <button type="button" onclick="alterarStatusProduto(${produto.id}, ${produto.ativo})"> 
+                        ${produto.ativo == 1 ? 'Inativar' : 'Ativar'}
+                        </button>
+                        </td>`;
+
+                    // 6. Adicionar a lista à tabela
+
+                    lista.appendChild(linha);
+                });
+            })
+            .catch(erro => {
+                console.error('Erro ao carregar produtos:', erro);
+            });
+    }
+
+    // 7. Carregar os produtos ao abrir a página
+    carregarProdutos();
+
+   // 8. Pesquisar produtos pelo nome
+    function pesquisarProduto() {
+
+    const pesquisa = document.getElementById('pesquisa').value.toLowerCase();
+
+    const lista = document.getElementById('listaProdutos');
+
+    const linhas = lista.getElementsByTagName('tr');
+
+    // Percorrer todas as linhas da tabela
+    for (let i = 0; i < linhas.length; i++) {
+
+        const nomeProduto = linhas[i].cells[1].textContent.toLowerCase();
+
+        // Verificar se o nome corresponde à pesquisa
+        if (nomeProduto.includes(pesquisa)) {
+            linhas[i].style.display = '';
+        } else {
+            linhas[i].style.display = 'none';
+        }
+
+    }
+}
+// 9. Buscar os dados do produto para edição
+function editarProduto(id) {
+
+    fetch('../backend/produtos/buscar.php?id=' + id)
+    .then(resposta => resposta.json())
+    .then(dados => {
+
+        const produto = dados.produto;
+
+        document.getElementById('editar_id').value = produto.id;
+        document.getElementById('editar_nome').value = produto.nome;
+        document.getElementById('editar_descricao').value = produto.descricao ?? '';
+        document.getElementById('editar_marca').value = produto.marca ?? '';
+        document.getElementById('editar_unidade').value = produto.unidade;
+        document.getElementById('editar_quantidade').value = produto.quantidade;
+        document.getElementById('editar_preco_venda').value = produto.preco_venda;
+        document.getElementById('editar_imagem_url').value = produto.imagem_url ?? '';
+    })
+    .catch(erro => {
+        console.error('Erro ao buscar produto:', erro);
+    });
+}
+
+// 10. Salvar alterações do produto
+document.getElementById('formEditarProduto').addEventListener('submit', function(event) {
+
+    //Impedir o recarregamento da página
+    event.preventDefault();
+
+    //Capturar os dados do formulário
+    const formulario = new FormData(this);
+
+    //Enviar os dados para o PHP
+    fetch('../backend/produtos/editar.php', {
+        method: 'POST',
+        body: formulario
+    })
+    .then(resposta => resposta.json())
+    .then(dados => {
+        if (dados.sucesso) {
+            alert('Produto atualizado com sucesso!');
+
+            //Atualizar a tabela
+            carregarProdutos();
+
+            //limpar o formulário
+            this.reset();
+        } else {
+            alert(dados.mensagem);
+        }
+    })
+    .catch(erro => {
+        console.error('Erro ao atualizar produto:', erro);
+        alert('Erro ao atualizar o produto.');
+    });
+});
+
+// 11. Ativar ou inativar um produto
+function alterarStatusProduto(id, statusAtual) {
+
+    // Inverter o status atual
+    const novoStatus = statusAtual == 1 ? 0 : 1;
+
+    // Definir a mensagem de confirmação
+    const acao = novoStatus == 1 ? 'ativar' : 'inativar';
+
+    // Confirmar a ação com o usuário
+    if (!confirm(`Deseja realmente ${acao} este produto?`)) {
+        return;
+    }
+
+    // Preparar os dados para envio
+    const dados = new FormData();
+
+    dados.append('id', id);
+    dados.append('ativo', novoStatus);
+
+    // Enviar os dados para o PHP
+    fetch('../backend/produtos/alterar_status.php', {
+        method: 'POST',
+        body: dados
+    })
+    .then(resposta => resposta.json())
+    .then(resultado => {
+
+        if (resultado.sucesso) {
+            alert(resultado.mensagem);
+
+            //Atualizar a tabela
+            carregarProdutos();
+        } else {
+            alert(resultado.mensagem);
+        }
+    })
+    .catch(erro => {
+        console.error('Erro ao alterar status:', erro);
+        alert('Não foi possivel alterar o status do produto.');
+    });
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,55 @@
+
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Cadastro de Produtos - LojaFacil</title>
+</head>
+<body>
+
+    <h1>LojaFacil</h1>
+    <h2>Cadastro de Produtos</h2>
+
+    <form action="../backend/produtos/cadastrar.php" method="POST">
+
+        <label for="nome">Nome do produto:</label>
+        <input type="text" id="nome" name="nome" required>
+
+        <br><br>
+
+        <label for="descricao">Descrição:</label>
+        <input type="text" id="descricao" name="descricao">
+
+        <br><br>
+
+        <label for="marca">Marca:</label>
+        <input type="text" id="marca" name="marca">
+
+        <br><br>
+
+        <label for="unidade">Unidade:</label>
+        <input type="text" id="unidade" name="unidade" value="UN" required>
+
+        <br><br>
+
+        <label for="quantidade">Quantidade em Estoque:</label>
+        <input type="number" id="quantidade" name="quantidade" step=" 0.001" min="0" value="0" required>
+
+        <br><br>
+        
+        <label for="preco_venda">Preço de venda:</label>
+        <input type="number" id="preco_venda" name="preco_venda" step="0.01" min="0.01" required>
+
+        <br><br>
+
+        <label for="imagem_url">URL da imagem:</label>
+        <input type="text" id="imagem_url" name="imagem_url">
+
+        <br><br>
+
+        <button type="submit">Cadastrar produto</button>
+
+    </form>
+
+</body>
+</html>
